@@ -1,0 +1,244 @@
+-- Users table to store user details
+CREATE TABLE Users (
+    WalletID INT PRIMARY KEY IDENTITY(10000, 1),
+    Password NVARCHAR(255) NOT NULL,
+    FirstName NVARCHAR(50) NOT NULL,
+    LastName NVARCHAR(50) NOT NULL,
+    Address NVARCHAR(255),
+    Email NVARCHAR(100) UNIQUE,
+    PhoneNumber NVARCHAR(15),
+    Balance DECIMAL(18, 2) DEFAULT 0.00,
+    Type NVARCHAR(10) DEFAULT 'Active' CHECK (Type IN ('Active', 'Frozen'))
+);
+
+-- Coin table to list available cryptocurrencies
+CREATE TABLE Coin (
+    CoinID INT PRIMARY KEY IDENTITY(1,1),
+    CoinName NVARCHAR(50) UNIQUE NOT NULL,
+    Price DECIMAL(18, 2) NOT NULL
+);
+
+-- Wallet table to manage each user's coin holdings
+CREATE TABLE Wallet (
+    WalletID INT,
+    CoinID INT,
+    Quantity DECIMAL(18, 2) DEFAULT 0.00,
+    FOREIGN KEY (WalletID) REFERENCES Users(WalletID),
+    FOREIGN KEY (CoinID) REFERENCES Coin(CoinID)
+);
+
+-- Company table to store company budget and details
+CREATE TABLE Company (
+    CompanyID INT PRIMARY KEY,
+    CompanyName NVARCHAR(100) NOT NULL,
+    Budget DECIMAL(18, 2) DEFAULT 10000000.00
+);
+
+-- Inventory table for the company's available coins
+CREATE TABLE Inventory (
+    CompanyID INT,
+    CoinID INT,
+    Quantity DECIMAL(18, 2) DEFAULT 0.00,
+    FOREIGN KEY (CompanyID) REFERENCES Company(CompanyID),
+    FOREIGN KEY (CoinID) REFERENCES Coin(CoinID)
+);
+
+-- Employee table for tracking employees who approve/reject orders
+CREATE TABLE Employee (
+    EmployeeID INT PRIMARY KEY,
+    Password NVARCHAR(255) NOT NULL,
+    FirstName NVARCHAR(50) NOT NULL,
+    LastName NVARCHAR(50) NOT NULL,
+    NumberOfRequests INT DEFAULT 0,
+    isSuperAdmin INT DEFAULT 0
+);
+
+-- Orders table, referencing WalletID from Users for user association
+CREATE TABLE Orders (
+    OrderID INT PRIMARY KEY IDENTITY(1,1),
+    WalletID INT,
+    CoinID INT,
+    Quantity DECIMAL(18, 2) NOT NULL,
+    Total DECIMAL(18, 2) NOT NULL,
+    Date DATE NOT NULL DEFAULT GETDATE(),
+    Type NVARCHAR(10) CHECK (Type IN ('Buy', 'Sell')),
+    Status NVARCHAR(20) CHECK (Status IN ('Pending', 'Approved', 'Rejected')) DEFAULT 'Pending',
+    EmployeeID INT NULL,
+    FOREIGN KEY (WalletID) REFERENCES Users(WalletID),
+    FOREIGN KEY (CoinID) REFERENCES Coin(CoinID),
+    FOREIGN KEY (EmployeeID) REFERENCES Employee(EmployeeID)
+);
+
+CREATE TABLE Trades (
+    TradeID INT PRIMARY KEY IDENTITY(1,1),
+    WalletID1 INT,
+    WalletID2 INT,
+    CoinID1 INT,
+    CoinID2 INT,
+    Quantity1 DECIMAL(18, 2) NOT NULL,
+    Quantity2 DECIMAL(18, 2) NOT NULL,
+    Date DATE NOT NULL DEFAULT GETDATE(),
+    Status NVARCHAR(20) CHECK (Status IN ('Pending', 'Accepted', 'Approved', 'Rejected')) DEFAULT 'Pending',
+    EmployeeID INT NULL, 
+    FOREIGN KEY (WalletID1) REFERENCES Users(WalletID),
+    FOREIGN KEY (WalletID2) REFERENCES Users(WalletID),
+    FOREIGN KEY (CoinID1) REFERENCES Coin(CoinID),
+    FOREIGN KEY (CoinID2) REFERENCES Coin(CoinID),
+    FOREIGN KEY (EmployeeID) REFERENCES Employee(EmployeeID) 
+);
+
+
+
+-- Insert top 50 cryptocurrencies into the Coin table
+INSERT INTO Coin (CoinName, Price) VALUES
+('Bitcoin', 76587.03),
+('Ethereum', 4200.50),
+('Tether', 1.00),
+('BNB', 320.75),
+('XRP', 0.85),
+('Cardano', 0.45),
+('Dogecoin', 0.10),
+('Solana', 35.20),
+('Polkadot', 5.60),
+('Litecoin', 80.00),
+('Shiba Inu', 0.01),
+('Polygon', 1.20),
+('TRON', 0.16),
+('Avalanche', 29.73),
+('Dai', 1.00),
+('Chainlink', 13.76),
+('Uniswap', 9.30),
+('Cosmos', 4.80),
+('Monero', 163.81),
+('Toncoin', 5.28),
+('Stellar', 0.10),
+('Internet Computer', 8.49),
+('Bitcoin Cash', 387.97),
+('Filecoin', 3.98),
+('TrueUSD', 1.00),
+('VeChain', 0.02),
+('Flow', 0.56),
+('Aave', 198.94),
+('Hedera', 0.05),
+('Algorand', 0.13),
+('Axie Infinity', 5.25),
+('Decentraland', 0.40),
+('Elrond', 29.60),
+('EOS', 0.60),
+('The Sandbox', 0.35),
+('Theta Network', 1.30),
+('Tezos', 0.70),
+('Fantom', 0.76),
+('Zcash', 45.71),
+('NEAR Protocol', 4.65),
+('Maker', 1491.40),
+('Chiliz', 0.10),
+('Enjin Coin', 0.25),
+('Pax Dollar', 1.00),
+('Synthetix', 2.30),
+('Curve DAO Token', 0.50),
+('Dash', 45.00),
+('Nexo', 0.60),
+('Compound', 40.00),
+('Loopring', 0.20);
+
+
+
+-- Insert 30 employees into the Employee table with unique passwords
+INSERT INTO Employee (EmployeeID, Password, FirstName, LastName, NumberOfRequests) VALUES
+(10001, 'password1', 'John', 'Doe', 0),
+(10002, 'password2', 'Jane', 'Smith', 0),
+(10003, 'password3', 'Michael', 'Johnson', 0),
+(10004, 'password4', 'Emily', 'Davis', 0),
+(10005, 'password5', 'David', 'Martinez', 0),
+(10006, 'password6', 'Laura', 'Garcia', 0),
+(10007, 'password7', 'James', 'Miller', 0),
+(10008, 'password8', 'Sarah', 'Rodriguez', 0),
+(10009, 'password9', 'Daniel', 'Wilson', 0),
+(10010, 'password10', 'Jessica', 'Martinez', 0),
+(10011, 'password11', 'Chris', 'Lee', 0),
+(10012, 'password12', 'Amanda', 'Walker', 0),
+(10013, 'password13', 'Ryan', 'Allen', 0),
+(10014, 'password14', 'Hannah', 'Young', 0),
+(10015, 'password15', 'Matthew', 'King', 0),
+(10016, 'password16', 'Ashley', 'Wright', 0),
+(10017, 'password17', 'Joshua', 'Lopez', 0),
+(10018, 'password18', 'Nicole', 'Hill', 0),
+(10019, 'password19', 'Brandon', 'Scott', 0),
+(10020, 'password20', 'Megan', 'Green', 0),
+(10021, 'password21', 'Tyler', 'Adams', 0),
+(10022, 'password22', 'Olivia', 'Baker', 0),
+(10023, 'password23', 'Alexander', 'Gonzalez', 0),
+(10024, 'password24', 'Brittany', 'Nelson', 0),
+(10025, 'password25', 'Austin', 'Carter', 0),
+(10026, 'password26', 'Sophia', 'Mitchell', 0),
+(10027, 'password27', 'Justin', 'Perez', 0),
+(10028, 'password28', 'Natalie', 'Roberts', 0),
+(10029, 'password29', 'Andrew', 'Turner', 0),
+(10030, 'password30', 'Rebecca', 'Phillips', 0);
+
+
+
+INSERT INTO Company (CompanyID, CompanyName, Budget)
+VALUES (1, 'Crypto Inc.', 10000000.00);
+
+
+
+INSERT INTO Inventory (CompanyID, CoinID, Quantity)
+SELECT 
+    1 AS CompanyID,  -- Assuming CompanyID is 1; adjust if necessary
+    Coin.CoinID,
+    CAST(1000000.0 / Coin.Price AS DECIMAL(18, 2)) AS Quantity
+FROM 
+    Coin
+WHERE 
+    Coin.CoinName IN (
+        'Bitcoin', 'Ethereum', 'Tether', 'BNB', 'XRP', 'Cardano', 'Dogecoin',
+        'Solana', 'Polkadot', 'Litecoin', 'Shiba Inu', 'Polygon', 'TRON', 
+        'Avalanche', 'Dai', 'Chainlink', 'Uniswap', 'Cosmos', 'Monero', 
+        'Toncoin', 'Stellar', 'Internet Computer', 'Bitcoin Cash', 'Filecoin', 
+        'TrueUSD', 'VeChain', 'Flow', 'Aave', 'Hedera', 'Algorand', 
+        'Axie Infinity', 'Decentraland', 'Elrond', 'EOS', 'The Sandbox', 
+        'Theta Network', 'Tezos', 'Fantom', 'Zcash', 'NEAR Protocol', 
+        'Maker', 'Chiliz', 'Enjin Coin', 'Pax Dollar', 'Synthetix', 
+        'Curve DAO Token', 'Dash', 'Nexo', 'Compound', 'Loopring'
+    );
+
+
+SET IDENTITY_INSERT Users ON;
+
+INSERT INTO Users (WalletID, Password, FirstName, LastName, Address, Email, PhoneNumber, Balance, Type) VALUES
+(10000, 'pass0', 'Samuel', 'Collins', 'Address0', 'samuel.collins@example.com', '1234567890', 100.00, 'Active'),
+(10001, 'pass1', 'Victoria', 'Reynolds', 'Address1', 'victoria.reynolds@example.com', '1234567891', 200.00, 'Active'),
+(10002, 'pass2', 'Ethan', 'Graham', 'Address2', 'ethan.graham@example.com', '1234567892', 300.00, 'Active'),
+(10003, 'pass3', 'Samantha', 'Parker', 'Address3', 'samantha.parker@example.com', '1234567893', 400.00, 'Active'),
+(10004, 'pass4', 'Nathan', 'Diaz', 'Address4', 'nathan.diaz@example.com', '1234567894', 500.00, 'Active'),
+(10005, 'pass5', 'Isabella', 'Mendoza', 'Address5', 'isabella.mendoza@example.com', '1234567895', 600.00, 'Active'),
+(10006, 'pass6', 'Adam', 'Hughes', 'Address6', 'adam.hughes@example.com', '1234567896', 700.00, 'Active'),
+(10007, 'pass7', 'Grace', 'Butler', 'Address7', 'grace.butler@example.com', '1234567897', 800.00, 'Active'),
+(10008, 'pass8', 'Lucas', 'Murphy', 'Address8', 'lucas.murphy@example.com', '1234567898', 900.00, 'Active'),
+(10009, 'pass9', 'Sophia', 'Bailey', 'Address9', 'sophia.bailey@example.com', '1234567899', 1000.00, 'Active'),
+(10010, 'pass10', 'Henry', 'Cruz', 'Address10', 'henry.cruz@example.com', '1234567800', 1100.00, 'Active'),
+(10011, 'pass11', 'Madeline', 'Howard', 'Address11', 'madeline.howard@example.com', '1234567801', 1200.00, 'Active'),
+(10012, 'pass12', 'Oliver', 'Bell', 'Address12', 'oliver.bell@example.com', '1234567802', 1300.00, 'Active'),
+(10013, 'pass13', 'Chloe', 'Ward', 'Address13', 'chloe.ward@example.com', '1234567803', 1400.00, 'Active'),
+(10014, 'pass14', 'Benjamin', 'Sanders', 'Address14', 'benjamin.sanders@example.com', '1234567804', 1500.00, 'Active'),
+(10015, 'pass15', 'Ella', 'Ramirez', 'Address15', 'ella.ramirez@example.com', '1234567805', 1600.00, 'Active'),
+(10016, 'pass16', 'Isaac', 'Flores', 'Address16', 'isaac.flores@example.com', '1234567806', 1700.00, 'Active'),
+(10017, 'pass17', 'Charlotte', 'Nguyen', 'Address17', 'charlotte.nguyen@example.com', '1234567807', 1800.00, 'Active'),
+(10018, 'pass18', 'Jack', 'Peterson', 'Address18', 'jack.peterson@example.com', '1234567808', 1900.00, 'Active'),
+(10019, 'pass19', 'Scarlett', 'Gray', 'Address19', 'scarlett.gray@example.com', '1234567809', 2000.00, 'Active'),
+(10020, 'pass20', 'Elijah', 'Watson', 'Address20', 'elijah.watson@example.com', '1234567810', 2100.00, 'Active'),
+(10021, 'pass21', 'Zoe', 'Ramsey', 'Address21', 'zoe.ramsey@example.com', '1234567811', 2200.00, 'Active'),
+(10022, 'pass22', 'William', 'Bryant', 'Address22', 'william.bryant@example.com', '1234567812', 2300.00, 'Active'),
+(10023, 'pass23', 'Ava', 'Garrett', 'Address23', 'ava.garrett@example.com', '1234567813', 2400.00, 'Active'),
+(10024, 'pass24', 'Logan', 'Fox', 'Address24', 'logan.fox@example.com', '1234567814', 2500.00, 'Active'),
+(10025, 'pass25', 'Emma', 'Holmes', 'Address25', 'emma.holmes@example.com', '1234567815', 2600.00, 'Active'),
+(10026, 'pass26', 'Sebastian', 'Mason', 'Address26', 'sebastian.mason@example.com', '1234567816', 2700.00, 'Active'),
+(10027, 'pass27', 'Abigail', 'Fisher', 'Address27', 'abigail.fisher@example.com', '1234567817', 2800.00, 'Active'),
+(10028, 'pass28', 'Dylan', 'Bishop', 'Address28', 'dylan.bishop@example.com', '1234567818', 2900.00, 'Active'),
+(10029, 'pass29', 'Lily', 'Morales', 'Address29', 'lily.morales@example.com', '1234567819', 3000.00, 'Active');
+
+SET IDENTITY_INSERT Users OFF;
+
+
