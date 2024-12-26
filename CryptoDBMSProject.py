@@ -5,7 +5,7 @@ import sys
 import pyodbc
 
 server = 'INSPIRON15\\SQLSERVER1'
-database = 'Project_new'
+database = 'Project'
 use_windows_authentication = True 
 username = 'your_username'
 password = 'your_password'
